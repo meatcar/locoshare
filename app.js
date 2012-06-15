@@ -34,14 +34,14 @@ app.configure('production', function(){
 //setup the errors
 app.error(function(err, req, res, next){
     if (err instanceof NotFound) {
-        res.render('404.jade', { locals: { 
-                  title : '404 - Not Found'
+        res.render('404', { locals: { 
+                  title : '404 - Not Found' + err.msg
                  ,description: ''
                  ,author: ''
                  ,analyticssiteid: 'XXXXXXX' 
                 },status: 404 });
     } else {
-        res.render('500.jade', { locals: { 
+        res.render('500', { locals: { 
                   title : 'The Server Encountered an Error'
                  ,description: ''
                  ,author: ''
@@ -69,7 +69,7 @@ io.sockets.on('connection', function(socket){
 // Routes
 
 app.get('/', routes.index);
-app.get('/share', routes.share);
+app.post('/share', routes.share);
 app.get('/show', routes.show);
 
 //A Route for Creating a 500 Error (Useful to keep around)
@@ -79,14 +79,16 @@ app.get('/500', function(req, res){
 
 //The 404 Route (ALWAYS Keep this as the last route)
 app.get('/*', function(req, res){
-    throw new NotFound;
+    throw new Error('404 - ' + req.url + ' Not Found');
 });
 
 function NotFound(msg){
     this.name = 'NotFound';
+    this.msg = msg;
     Error.call(this, msg);
     Error.captureStackTrace(this, arguments.callee);
 }
+NotFound.prototype.__proto__ = Error.prototype;
 
 
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
