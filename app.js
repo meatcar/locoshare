@@ -69,6 +69,8 @@ io.sockets.on('connection', function(socket){
 // Routes
 
 app.get('/', routes.index);
+app.get('/share', routes.share);
+app.get('/show', routes.show);
 
 //A Route for Creating a 500 Error (Useful to keep around)
 app.get('/500', function(req, res){
