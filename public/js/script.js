@@ -3,27 +3,34 @@
 
 $(document).ready(function() {   
 
- // var socket = io.connect();
+  var socket = io.connect();
+  var watchID;
 
-  $('#sender').bind('click', function() {
-//    socket.emit('message', 'Message Sent on ' + new Date());     
-    navigator.geolocation.getCurrentPosition(success, error);
+  if ("geolocation" in navigator) {
+    watchID = navigator.geolocation.watchPosition(success, error);
+  } else {
+    $('body').text('no location supported');
+  }
+
+  socket.on('ack', function(data){
+   $('#receiver').append('<li>' + data + '</li>');  
   });
 
-//  socket.on('server_message', function(data){
-//   $('#receiver').append('<li>' + data + '</li>');  
-//  });
-
   function success(position) {
-    $.ajax( {
-      type: 'POST',
-      url: '/share',
-      data: { latitude: position.coords.latitude,
-              longitude: position.coords.longitude }
-    });
+    console.log(position);
+    socket.emit('share', 
+      { latitude: position.coords.latitude,
+        longitude: position.coords.longitude });
+//    $.ajax( {
+//      type: 'POST',
+//      url: '/share',
+//      data: { latitude: position.coords.latitude,
+//              longitude: position.coords.longitude }
+//    });
   }
 
   function error(arg) {
+    navigator.geolocation.clearWatch(watchID);
     console.log(arg);
   }
 });

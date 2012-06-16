@@ -1,0 +1,8 @@
+- locoshare/share/12j4jfj92j3nds9
+  locoshare/show/12j4jfj92j3nds9
+
+- user has a number of shares that he can administer
+- shares don't know what user they belong to.
+
+- redis as database, subscribe to changes for show, sockets.io for communication
+

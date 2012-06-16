@@ -34,14 +34,14 @@ app.configure('production', function(){
 //setup the errors
 app.error(function(err, req, res, next){
     if (err instanceof NotFound) {
-        res.render('404', { locals: { 
+        res.render('404.jade', { locals: { 
                   title : '404 - Not Found' + err.msg
                  ,description: ''
                  ,author: ''
                  ,analyticssiteid: 'XXXXXXX' 
                 },status: 404 });
     } else {
-        res.render('500', { locals: { 
+        res.render('500.jade', { locals: { 
                   title : 'The Server Encountered an Error'
                  ,description: ''
                  ,author: ''
@@ -57,9 +57,8 @@ app.listen(3000);
 var io = io.listen(app);
 io.sockets.on('connection', function(socket){
   console.log('Client Connected');
-  socket.on('message', function(data){
-    socket.broadcast.emit('server_message',data);
-    socket.emit('server_message',data);
+  socket.on('share', function(data){
+    socket.emit('ack', data.latitude + ', ' + data.longitude);
   });
   socket.on('disconnect', function(){
     console.log('Client Disconnected.');
@@ -77,11 +76,6 @@ app.get('/500', function(req, res){
     throw new Error('This is a 500 Error');
 });
 
-//The 404 Route (ALWAYS Keep this as the last route)
-app.get('/*', function(req, res){
-    throw new Error('404 - ' + req.url + ' Not Found');
-});
-
 function NotFound(msg){
     this.name = 'NotFound';
     this.msg = msg;
@@ -90,5 +84,9 @@ function NotFound(msg){
 }
 NotFound.prototype.__proto__ = Error.prototype;
 
+//The 404 Route (ALWAYS Keep this as the last route)
+app.get('/*', function(req, res){
+    throw new NotFound();
+});
 
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
